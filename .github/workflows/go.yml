@@ -100,7 +100,8 @@ jobs:
             cd /var/www/user-service
             go build -o user-service ./cmd/main.go
             echo "Application build success"
-            pgrep -f user-service && pkill -f user-service || true
+            ps aux | grep user-service
+            pgrep -f user-service && pkill -9 -f user-service || true
             echo "Application kill success"
             nohup ./user-service > /var/www/user-service/app.log 2>&1 &
             echo "Application start success"
