@@ -90,13 +90,15 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
+            pwd
+            
             cd $DEPLOY_PATH
             go mod tidy
             go install github.com/jackc/tern@latest
             export PATH=$PATH:$(go env GOPATH)/bin
-            cd /internal/db/migrations
+            cd $DEPLOY_PATH/internal/db/migrations
             tern migrate
-            cd ../../../
+            cd $DEPLOY_PATH
             go build -o user-service ./cmd/main.go
             pkill -f user-service || true
             nohup ./user-service > app.log 2>&1 &
