@@ -89,6 +89,18 @@ jobs:
         run: |
           ssh $DEPLOY_USER@$DEPLOY_SERVER "cd $DEPLOY_PATH && go mod tidy"
 
+      - name: Install Tern
+        run:
+          go install github.com/jackc/tern@latest
+
+      - name: Run Tern Migrate
+        env:
+          DEPLOY_SERVER: ${{ secrets.DEPLOY_SERVER }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          ssh $DEPLOY_USER@$DEPLOY_SERVER "cd $DEPLOY_PATH && tern migrate"
+
       - name: Build Go project
         env:
           DEPLOY_SERVER: ${{ secrets.DEPLOY_SERVER }}
