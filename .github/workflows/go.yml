@@ -100,5 +100,7 @@ jobs:
             cd /var/www/user-service
             go build -o user-service ./cmd/main.go
             echo "Application build success"
+            pkill -9 -x -f './user-service'
+            echo "Application kill success"
             nohup ./user-service > /var/www/user-service/app.log 2>&1 &
             echo "Application start success"
