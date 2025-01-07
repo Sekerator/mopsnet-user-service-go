@@ -24,14 +24,11 @@ func FromEnv() (*Config, error) {
 	v.SetDefault("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/magbat_user?sslmode=disable")
 	v.SetConfigName("env")
 	v.SetConfigFile("./.env")
-	err := v.ReadInConfig()
-	if err != nil {
-		fmt.Printf("Не удалось загрузить файл .env: %v\n", err)
-	}
+	_ = v.ReadInConfig()
 	v.AutomaticEnv()
 
 	cfg := Config{}
-	err = v.Unmarshal(&cfg)
+	err := v.Unmarshal(&cfg)
 	if err != nil {
 		return nil, err
 	}
