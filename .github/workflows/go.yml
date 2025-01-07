@@ -1,0 +1,68 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build and Test
+    runs-on: ubuntu-latest
+
+    steps:
+      # Проверка исходного кода
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Установка Go
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.20 # Укажи версию Go
+
+      # Кэширование модулей Go
+      - name: Cache Go modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      # Установка зависимостей
+      - name: Install dependencies
+        run: go mod tidy
+
+      # Сборка проекта
+      - name: Build project
+        run: go build -v ./...
+
+      # Запуск тестов
+      - name: Run tests
+        run: go test -v ./...
+
+  deploy:
+    name: Deploy Application
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main' # Выполнять только при пуше в main
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy to Server
+        env:
+          DEPLOY_SERVER: ${{ secrets.DEPLOY_SERVER }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          ssh $DEPLOY_USER@$DEPLOY_SERVER "mkdir -p $DEPLOY_PATH"
+          rsync -avz ./ $DEPLOY_USER@$DEPLOY_SERVER:$DEPLOY_PATH
+          ssh $DEPLOY_USER@$DEPLOY_SERVER "cd $DEPLOY_PATH && ./restart.sh"
