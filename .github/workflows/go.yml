@@ -101,7 +101,8 @@ jobs:
             go build -o user-service ./cmd/main.go
             echo "Application build success"
             ps aux | grep user-service
-            pgrep -f user-service && pkill -9 -f user-service || true
+            pgrep -f user-service && pkill -9 -f user-service || (exit_code=$? && [ $exit_code -eq 137 ] && exit 0)
+            sleep 1
             echo "Application kill success"
             nohup ./user-service > /var/www/user-service/app.log 2>&1 &
             echo "Application start success"
