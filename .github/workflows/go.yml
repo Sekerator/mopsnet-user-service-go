@@ -79,4 +79,12 @@ jobs:
         run: |
           ssh $DEPLOY_USER@$DEPLOY_SERVER "mkdir -p $DEPLOY_PATH"
           rsync -avz ./ $DEPLOY_USER@$DEPLOY_SERVER:$DEPLOY_PATH
-          ssh $DEPLOY_USER@$DEPLOY_SERVER "cd $DEPLOY_PATH && ./restart.sh"
+          ssh $DEPLOY_USER@$DEPLOY_SERVER "cd $DEPLOY_PATH"
+
+      - name: Build Go project
+        run: go build -o user-service ./cmd/main.go
+
+      - name: Start application
+        run: |
+          pkill -f user-service || true
+          ssh $DEPLOY_USER@$DEPLOY_SERVER "cd $DEPLOY_PATH && nohup ./user-service > app.log 2>&1 &"
