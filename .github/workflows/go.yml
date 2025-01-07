@@ -101,3 +101,4 @@ jobs:
             go build -o user-service ./cmd/main.go
             pkill -f user-service || true
             nohup ./user-service > /var/www/user-service/app.log 2>&1 &
+            echo "Application start success"
