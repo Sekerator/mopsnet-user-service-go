@@ -90,8 +90,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            pwd
-            
+            cd /
             cd $DEPLOY_PATH
             go mod tidy
             go install github.com/jackc/tern@latest
