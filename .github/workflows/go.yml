@@ -82,8 +82,6 @@ jobs:
 
       - name: Run commands on server
         uses: appleboy/ssh-action@v0.1.10
-        env:
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
         with:
           host: ${{ secrets.DEPLOY_SERVER }}
           username: ${{ secrets.DEPLOY_USER }}
@@ -91,13 +89,13 @@ jobs:
           port: 22
           script: |
             cd /
-            cd $DEPLOY_PATH
+            cd /var/www/user-service
             go mod tidy
             go install github.com/jackc/tern@latest
             export PATH=$PATH:$(go env GOPATH)/bin
-            cd $DEPLOY_PATH/internal/db/migrations
+            cd /var/www/user-service/internal/db/migrations
             tern migrate
-            cd $DEPLOY_PATH
+            cd /var/www/user-service
             go build -o user-service ./cmd/main.go
             pkill -f user-service || true
             nohup ./user-service > app.log 2>&1 &
