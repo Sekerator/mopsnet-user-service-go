@@ -57,76 +57,32 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          if [ -z "$DEPLOY_SERVER" ]; then
-            echo "DEPLOY_SERVER is not set"
-            exit 1
-          fi
-          ssh-keyscan -H $DEPLOY_SERVER >> ~/.ssh/known_hosts
-        env:
-          DEPLOY_SERVER: ${{ secrets.DEPLOY_SERVER }}
-
-
       - name: Deploy to Server
         env:
           DEPLOY_SERVER: ${{ secrets.DEPLOY_SERVER }}
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
         run: |
-          ssh $DEPLOY_USER@$DEPLOY_SERVER "mkdir -p $DEPLOY_PATH"
           rsync -avz --delete --exclude ".env" ./ $DEPLOY_USER@$DEPLOY_SERVER:$DEPLOY_PATH
-          ssh $DEPLOY_USER@$DEPLOY_SERVER "cd $DEPLOY_PATH"
 
-      - name: Install dependencies
+      - name: Run commands on server
+        uses: appleboy/ssh-action@v0.1.10
         env:
-          DEPLOY_SERVER: ${{ secrets.DEPLOY_SERVER }}
-          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-        run: |
-          ssh $DEPLOY_USER@$DEPLOY_SERVER "cd $DEPLOY_PATH && go mod tidy"
-
-      - name: Download Tern
-        env:
-          DEPLOY_SERVER: ${{ secrets.DEPLOY_SERVER }}
-          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-        run:
-          ssh $DEPLOY_USER@$DEPLOY_SERVER "cd $DEPLOY_PATH/internal/db/migrations && 
-          go install github.com/jackc/tern@latest"
-
-      - name: Upload path
-        env:
-          DEPLOY_SERVER: ${{ secrets.DEPLOY_SERVER }}
-          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-        run:
-          ssh $DEPLOY_USER@$DEPLOY_SERVER "export PATH=$PATH:$(go env GOPATH)/bin"
-
-      - name: Tern Migrate
-        env:
-          DEPLOY_SERVER: ${{ secrets.DEPLOY_SERVER }}
-          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-        run:
-          ssh $DEPLOY_USER@$DEPLOY_SERVER "tern"
-
-      - name: Build Go project
-        env:
-          DEPLOY_SERVER: ${{ secrets.DEPLOY_SERVER }}
-          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-        run: |
-          ssh $DEPLOY_USER@$DEPLOY_SERVER "cd $DEPLOY_PATH && go build -o user-service ./cmd/main.go"
-
-      - name: Start application
-        env:
-          DEPLOY_SERVER: ${{ secrets.DEPLOY_SERVER }}
-          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-        run: |
-          ssh $DEPLOY_USER@$DEPLOY_SERVER "cd $DEPLOY_PATH && pkill -f user-service || true"
-          ssh $DEPLOY_USER@$DEPLOY_SERVER "cd $DEPLOY_PATH && nohup ./user-service > app.log 2>&1 &"
+        with:
+          host: ${{ secrets.DEPLOY_SERVER }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            mkdir -p $DEPLOY_PATH
+            cd $DEPLOY_PATH
+            go mod tidy
+            go install github.com/jackc/tern@latest
+            export PATH=$PATH:$(go env GOPATH)/bin
+            cd /internal/db/migrations
+            tern migrate
+            cd ../../../
+            go build -o user-service ./cmd/main.go
+            pkill -f user-service || true
+            nohup ./user-service > app.log 2>&1 &
