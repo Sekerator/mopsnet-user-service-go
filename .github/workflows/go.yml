@@ -57,16 +57,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install sshpass
-        run: sudo apt-get install -y sshpass
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H $DEPLOY_SERVER >> ~/.ssh/known_hosts
 
       - name: Deploy to Server
         env:
           DEPLOY_SERVER: ${{ secrets.DEPLOY_SERVER }}
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-          DEPLOY_PASSWORD: ${{ secrets.DEPLOY_PASSWORD }}
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
         run: |
-          sshpass -p "$DEPLOY_PASSWORD" ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_SERVER "mkdir -p $DEPLOY_PATH"
-          sshpass -p "$DEPLOY_PASSWORD" rsync -avz ./ $DEPLOY_USER@$DEPLOY_SERVER:$DEPLOY_PATH
-          sshpass -p "$DEPLOY_PASSWORD" ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_SERVER "cd $DEPLOY_PATH && ./restart.sh"
+          ssh $DEPLOY_USER@$DEPLOY_SERVER "mkdir -p $DEPLOY_PATH"
+          rsync -avz ./ $DEPLOY_USER@$DEPLOY_SERVER:$DEPLOY_PATH
+          ssh $DEPLOY_USER@$DEPLOY_SERVER "cd $DEPLOY_PATH && ./restart.sh"
