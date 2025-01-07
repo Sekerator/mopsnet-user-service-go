@@ -94,6 +94,7 @@ jobs:
             go install github.com/jackc/tern@latest
             export PATH=$PATH:$(go env GOPATH)/bin
             cd /var/www/user-service/internal/db/migrations
+            mv -f tern.prod.conf tern.conf
             tern migrate
             cd /var/www/user-service
             go build -o user-service ./cmd/main.go
