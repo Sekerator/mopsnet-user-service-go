@@ -81,8 +81,11 @@ jobs:
           rsync -avz --delete ./ $DEPLOY_USER@$DEPLOY_SERVER:$DEPLOY_PATH
           ssh $DEPLOY_USER@$DEPLOY_SERVER "cd $DEPLOY_PATH"
 
+      - name: Install dependencies
+        run: go mod tidy
+
       - name: Build Go project
-        run: go build -o user-service ./cmd/main.go
+        run: go build -o ./user-service ./cmd/main.go
 
       - name: Start application
         env:
