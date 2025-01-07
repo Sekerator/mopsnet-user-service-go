@@ -18,15 +18,20 @@ func (c Config) ListenAddrAndPort() string {
 
 func FromEnv() (*Config, error) {
 	v := viper.New()
-	v.SetDefault("LISTEN_ADDR", "0.0.0.0аа")
+	v.SetDefault("LISTEN_ADDR", "0.0.0.0")
 	v.SetDefault("LISTEN_PORT", "8000")
 	v.SetDefault("ENV", "local")
 	v.SetDefault("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/magbat_user?sslmode=disable")
 	v.SetConfigName("env")
+	v.SetConfigFile("./.env")
+	err := v.ReadInConfig()
+	if err != nil {
+		fmt.Printf("Не удалось загрузить файл .env: %v\n", err)
+	}
 	v.AutomaticEnv()
 
 	cfg := Config{}
-	err := v.Unmarshal(&cfg)
+	err = v.Unmarshal(&cfg)
 	if err != nil {
 		return nil, err
 	}
