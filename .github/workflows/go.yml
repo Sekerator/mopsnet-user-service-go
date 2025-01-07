@@ -73,18 +73,22 @@ jobs:
 
       - name: Deploy to Server
         env:
-          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
           DEPLOY_SERVER: ${{ secrets.DEPLOY_SERVER }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
         run: |
-          # Проверяем, что переменные не пустые
-          if [ -z "$DEPLOY_USER" ] || [ -z "$DEPLOY_SERVER" ]; then
-            echo "DEPLOY_USER or DEPLOY_SERVER is not set"
-            exit 1
-          fi
+          ssh $DEPLOY_USER@$DEPLOY_SERVER "mkdir -p $DEPLOY_PATH"
+          rsync -avz --delete ./ $DEPLOY_USER@$DEPLOY_SERVER:$DEPLOY_PATH
+          ssh $DEPLOY_USER@$DEPLOY_SERVER "cd $DEPLOY_PATH"
 
-          # Останавливаем старую версию приложения
-          ssh $DEPLOY_USER@$DEPLOY_SERVER "pkill -f user-service || true"
+      - name: Build Go project
+        run: go build -o user-service ./cmd/main.go
 
-          # Запускаем новое приложение
+      - name: Start application
+        env:
+          DEPLOY_SERVER: ${{ secrets.DEPLOY_SERVER }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          pkill -f user-service || true
           ssh $DEPLOY_USER@$DEPLOY_SERVER "cd $DEPLOY_PATH && nohup ./user-service > app.log 2>&1 &"
