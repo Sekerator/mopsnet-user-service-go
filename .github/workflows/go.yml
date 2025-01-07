@@ -98,4 +98,4 @@ jobs:
             cd /var/www/user-service
             go build -o user-service ./cmd/main.go
             pkill -f user-service || true
-            nohup ./user-service > app.log 2>&1 &
+            nohup ./user-service > /var/www/user-service/app.log 2>&1 &
