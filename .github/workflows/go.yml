@@ -59,10 +59,15 @@ jobs:
 
       - name: Set up SSH
         run: |
-          mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
+          if [ -z "$DEPLOY_SERVER" ]; then
+            echo "DEPLOY_SERVER is not set"
+            exit 1
+          fi
           ssh-keyscan -H $DEPLOY_SERVER >> ~/.ssh/known_hosts
+        env:
+          DEPLOY_SERVER: ${{ secrets.DEPLOY_SERVER }}
 
       - name: Deploy to Server
         env:
