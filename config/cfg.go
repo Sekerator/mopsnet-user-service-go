@@ -23,7 +23,7 @@ func FromEnv() (*Config, error) {
 	v.SetDefault("ENV", "local")
 	v.SetDefault("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/magbat_user?sslmode=disable")
 	v.SetConfigName("env")
-	v.SetConfigFile("./.env")
+	v.SetConfigFile(".env")
 	_ = v.ReadInConfig()
 	v.AutomaticEnv()
 
