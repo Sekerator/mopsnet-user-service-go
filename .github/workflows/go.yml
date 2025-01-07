@@ -96,8 +96,15 @@ jobs:
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
         run:
           ssh $DEPLOY_USER@$DEPLOY_SERVER "cd $DEPLOY_PATH/internal/db/migrations && 
-          go install github.com/jackc/tern@latest &&
-          export PATH=$PATH:$(go env GOPATH)/bin"
+          go install github.com/jackc/tern@latest"
+
+      - name: Upload path
+        env:
+          DEPLOY_SERVER: ${{ secrets.DEPLOY_SERVER }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run:
+          ssh $DEPLOY_USER@$DEPLOY_SERVER "export PATH=$PATH:$(go env GOPATH)/bin"
 
       - name: Tern Migrate
         env:
