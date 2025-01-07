@@ -99,7 +99,7 @@ jobs:
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
         run: |
-          ssh $DEPLOY_USER@$DEPLOY_SERVER "cd $DEPLOY_PATH && tern migrate"
+          ssh $DEPLOY_USER@$DEPLOY_SERVER "cd $DEPLOY_PATH/internal/db/migrations && $HOME/go/bin/tern migrate"
 
       - name: Build Go project
         env:
