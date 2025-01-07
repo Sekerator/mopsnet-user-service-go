@@ -105,8 +105,7 @@ jobs:
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
         run:
-          ssh $DEPLOY_USER@$DEPLOY_SERVER "cd $DEPLOY_PATH/internal/db/migrations &&
-          tern migrate"
+          ssh $DEPLOY_USER@$DEPLOY_SERVER "tern"
 
       - name: Build Go project
         env:
@@ -122,5 +121,5 @@ jobs:
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
         run: |
-          pkill -f user-service || true
+          ssh $DEPLOY_USER@$DEPLOY_SERVER "cd $DEPLOY_PATH && pkill -f user-service || true"
           ssh $DEPLOY_USER@$DEPLOY_SERVER "cd $DEPLOY_PATH && nohup ./user-service > app.log 2>&1 &"
