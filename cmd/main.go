@@ -57,7 +57,9 @@ func main() {
 	})
 
 	log.Println("Сервер запущен по адресу: ", cfg.ListenAddrAndPort())
+	log.Println("Версия: ", cfg.Env)
 	logger.Println("Сервер запущен по адресу: ", cfg.ListenAddrAndPort())
+	logger.Println("Версия: ", cfg.Env)
 
 	if cfg.Env == "local" {
 		err = http.ListenAndServe(cfg.ListenAddrAndPort(), r)
