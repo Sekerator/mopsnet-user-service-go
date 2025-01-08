@@ -59,7 +59,22 @@ func main() {
 	log.Println("Сервер запущен по адресу: ", cfg.ListenAddrAndPort())
 	logger.Println("Сервер запущен по адресу: ", cfg.ListenAddrAndPort())
 
-	err = http.ListenAndServe(cfg.ListenAddrAndPort(), r)
+	if cfg.Env == "local" {
+		err = http.ListenAndServe(cfg.ListenAddrAndPort(), r)
+	} else {
+		go func() {
+			log.Println("Redirecting HTTP to HTTPS")
+			_ = http.ListenAndServe(":8080", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				http.Redirect(w, r, "https://"+r.Host+r.RequestURI, http.StatusMovedPermanently)
+			}))
+		}()
+
+		err = http.ListenAndServeTLS(cfg.ListenAddrAndPort(),
+			"/etc/letsencrypt/live/mopsnet.ru/fullchain.pem",
+			"/etc/letsencrypt/live/mopsnet.ru/privkey.pem",
+			r)
+	}
+
 	if err != nil {
 		logger.Fatalf("Ошибка запуска сервера: %v", err)
 		return
