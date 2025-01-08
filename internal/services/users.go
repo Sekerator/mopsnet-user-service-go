@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"golang.org/x/crypto/bcrypt"
 	"time"
 	"user/internal/db/entities"
@@ -28,6 +29,11 @@ func (us *UserServ) Login(userData entities.UserJson) (*entities.UserModel, erro
 		user, err = us.userRepo.GetUserByUsername(userData.Username)
 		if err != nil {
 			return nil, err
+		}
+
+		err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(userData.Password))
+		if err != nil {
+			return nil, errors.New("неверный пароль")
 		}
 
 		var authToken string
