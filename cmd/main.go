@@ -7,6 +7,7 @@ import (
 	_ "github.com/lib/pq"
 	"log"
 	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"time"
 	"user-service/config"
@@ -35,6 +36,10 @@ func main() {
 		return
 	}
 	defer conn.Close()
+
+	go func() {
+		log.Println(http.ListenAndServe(cfg.ListenAddr+":6060", nil))
+	}()
 
 	r := chi.NewRouter()
 
@@ -66,7 +71,7 @@ func main() {
 	} else {
 		go func() {
 			log.Println("Redirecting HTTP to HTTPS")
-			_ = http.ListenAndServe(":8080", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			_ = http.ListenAndServe(cfg.ListenAddrAndPort(), http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				http.Redirect(w, r, "https://"+r.Host+r.RequestURI, http.StatusMovedPermanently)
 			}))
 		}()
