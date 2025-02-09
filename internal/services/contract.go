@@ -1,7 +1,7 @@
 package services
 
 import (
-	"user/internal/db/entities"
+	"user-service/internal/db/entities"
 )
 
 type UserServices interface {

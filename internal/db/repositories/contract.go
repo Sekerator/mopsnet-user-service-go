@@ -1,7 +1,7 @@
 package repositories
 
 import (
-	"user/internal/db/entities"
+	"user-service/internal/db/entities"
 )
 
 type UserRepository interface {

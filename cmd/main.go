@@ -9,10 +9,10 @@ import (
 	"net/http"
 	"os"
 	"time"
-	"user/config"
-	"user/internal/db/repositories"
-	"user/internal/handlers"
-	"user/internal/services"
+	"user-service/config"
+	"user-service/internal/db/repositories"
+	"user-service/internal/handlers"
+	"user-service/internal/services"
 )
 
 func main() {

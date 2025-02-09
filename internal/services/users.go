@@ -4,9 +4,9 @@ import (
 	"errors"
 	"golang.org/x/crypto/bcrypt"
 	"time"
-	"user/internal/db/entities"
-	"user/internal/db/repositories"
-	tokenGenerator "user/pkg/token-generator"
+	"user-service/internal/db/entities"
+	"user-service/internal/db/repositories"
+	tokenGenerator "user-service/pkg/token-generator"
 )
 
 type UserServ struct {

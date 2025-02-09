@@ -3,7 +3,7 @@ package repositories
 import (
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
-	"user/internal/db/entities"
+	"user-service/internal/db/entities"
 )
 
 type UserRepo struct {

@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"strings"
-	"user/internal/db/entities"
-	"user/internal/services"
+	"user-service/internal/db/entities"
+	"user-service/internal/services"
 )
 
 type UserHand struct {
