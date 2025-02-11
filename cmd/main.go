@@ -37,10 +37,6 @@ func main() {
 	}
 	defer conn.Close()
 
-	go func() {
-		log.Println(http.ListenAndServe(cfg.ListenAddr+":6060", nil))
-	}()
-
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
